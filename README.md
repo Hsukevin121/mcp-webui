@@ -19,7 +19,7 @@ npm install
 ## 前端
 ```
 cd ~/mcp-webui/frontend
-npm start
+npm run dev -- --host
 ```
 ## 後端
 ```
