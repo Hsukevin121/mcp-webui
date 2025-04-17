@@ -18,6 +18,11 @@ async function initChatManager() {
   }
 }
 
+export function resetChatManager() {
+  chatManager = undefined;
+  console.log('🔁 chatManager 已重置，等待下次初始化');
+}
+
 export async function runAgent(input: string): Promise<string> {
   try {
     await initChatManager();
@@ -33,6 +38,6 @@ export async function runAgent(input: string): Promise<string> {
     return ' AI 已處理（但無回傳內容）';
   } catch (err) {
     console.error("MCP Agent 執行錯誤：", err);
-    return "⚠️ MCP Agent 回覆失敗，請稍後再試。";
+    return "MCP Agent 回覆失敗，請稍後再試。";
   }
 }

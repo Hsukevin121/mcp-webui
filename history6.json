@@ -1,0 +1,6 @@
+[
+  {
+    "user": "456",
+    "assistant": "<tool_call>\n{\"name\": \"none\", \"arguments\": null}\n</tool_call>\n\nIf you had a question or needed an action performed with the number 456, please provide more details so I can assist you better. For instance, if you wanted to perform a calculation or find information related to this number, let me know how you'd like me to use it."
+  }
+]

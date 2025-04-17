@@ -1,0 +1,6 @@
+[
+  {
+    "user": "789",
+    "assistant": "<tool_call>\n{\"name\": \"none\", \"arguments\": null}\n</tool_call>\n\nIt appears that you've provided the number 789. How can I assist you with this number? Do you need information about this number, or are you looking to perform a calculation or find some specific details related to it? Please let me know how you would like to proceed."
+  }
+]

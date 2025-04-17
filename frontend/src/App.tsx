@@ -1,62 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  Container, Title, Select, Button, Textarea, Card, Text, Loader, Group,
+  Stack, Notification, SegmentedControl
+} from '@mantine/core';
 import axios from 'axios';
 
+const API_BASE = 'http://192.168.31.132:3100';
+
 function App() {
+  const [models, setModels] = useState([]);
+  const [currentModel, setCurrentModel] = useState('');
+  const [tone, setTone] = useState('formal');
   const [message, setMessage] = useState('');
-  const [reply, setReply] = useState('');
   const [loading, setLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    axios.get(`${API_BASE}/api/models`).then(res => {
+      setModels(res.data.models);
+      setCurrentModel(res.data.models[0]);
+    });
+  }, []);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-
     setLoading(true);
-    setReply(''); // 清除上次回答
     try {
-      const res = await axios.post('http://192.168.31.132:3100/api/chat', {
-        message,
-      });
-
-      setReply(res.data.reply); // ✅ 顯示來自後端的 AI 回覆
+      const res = await axios.post(`${API_BASE}/api/chat`, { message, tone });
+      setChatHistory(prev => [...prev, { user: message, assistant: res.data.reply }]);
+      setMessage('');
     } catch (err) {
-      setReply('❌ 無法取得回覆，請確認後端是否正在運作');
+      setError('無法取得 AI 回覆');
     } finally {
       setLoading(false);
     }
   };
 
+  const newChat = async () => {
+    await axios.post(`${API_BASE}/api/chat/new`);
+    setChatHistory([]);
+  };
+
   return (
-    <div style={{ padding: 24, fontFamily: 'Arial', maxWidth: 800, margin: '0 auto' }}>
-      <h2>🤖 MCP AI 聊天室</h2>
+    <Container size="sm" py="lg">
+      <Title mb="lg">🤖 MCP AI Chatbot</Title>
 
-      <div style={{ marginBottom: 16 }}>
-        <input
-          type="text"
-          value={message}
-          placeholder="輸入你的問題..."
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') sendMessage();
-          }}
-          style={{
-            width: '80%',
-            padding: '8px',
-            fontSize: '16px',
-          }}
+      {error && <Notification color="red" onClose={() => setError('')}>{error}</Notification>}
+
+      <Group justify="space-between">
+        <Select
+          label="選擇模型"
+          data={models}
+          value={currentModel}
+          onChange={setCurrentModel}
+          style={{ width: '48%' }}
         />
-        <button onClick={sendMessage} style={{ marginLeft: 8, padding: '8px 16px' }}>
-          傳送
-        </button>
-      </div>
 
-      {loading && <p>⌛ 回覆中，請稍候...</p>}
+        <SegmentedControl
+          value={tone}
+          onChange={setTone}
+          data={[
+            { label: '正式', value: 'formal' },
+            { label: '簡潔', value: 'concise' },
+            { label: '幽默', value: 'humorous' },
+          ]}
+          style={{ width: '48%' }}
+        />
+      </Group>
 
-      {reply && !loading && (
-        <div style={{ marginTop: 16, backgroundColor: '#f0f0f0', padding: 16, borderRadius: 8 }}>
-          <strong>AI 回覆：</strong>
-          <p style={{ whiteSpace: 'pre-wrap' }}>{reply}</p>
-        </div>
-      )}
-    </div>
+      <Stack my="md">
+        {chatHistory.map((msg, i) => (
+          <Card key={i} shadow="sm">
+            <Text size="sm" color="dimmed"><b>你：</b> {msg.user}</Text>
+            <Text size="sm"><b>AI：</b> {msg.assistant}</Text>
+          </Card>
+        ))}
+      </Stack>
+
+      <Textarea
+        placeholder="輸入訊息..."
+        value={message}
+        onChange={(e) => setMessage(e.currentTarget.value)}
+        onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+      />
+
+      <Group mt="md">
+        <Button fullWidth onClick={sendMessage} disabled={loading}>
+          {loading ? <Loader size="xs" color="white" /> : '送出'}
+        </Button>
+        <Button variant="outline" fullWidth onClick={newChat}>
+          新對話
+        </Button>
+      </Group>
+    </Container>
   );
 }
 
