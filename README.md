@@ -26,3 +26,6 @@ npm start
 cd ~/mcp-webui
 npx tsx src/server.ts
 ```
+
+**Reference :**
+[TypeScript MCP Agent with Ollama Integration](https://github.com/ausboss/mcp-ollama-agent/tree/main)
